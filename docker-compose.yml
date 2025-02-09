@@ -1,0 +1,32 @@
+name: tars
+
+volumes:
+  db-data:
+
+services:
+  server:
+    image: oven/bun:1
+    restart: unless-stopped
+    init: true
+    command:
+      - /bin/bash
+      - -euxo
+      - pipefail
+      - -c
+      - >
+        bun install && exec bun run dev --hostname 0.0.0.0 --port 3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - '3000:3000'
+
+  db:
+    image: bitnami/postgresql:17
+    restart: unless-stopped
+    environment:
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: postgres
+    volumes:
+      - db-data:/bitnami/postgresql

@@ -1,0 +1,40 @@
+version: '3'
+
+env: { }
+
+vars: { }
+
+dotenv: [ ]
+
+tasks:
+  default:
+    cmd:
+      task: up
+
+  up:
+    desc: Build and start Docker containers
+    cmd: docker compose up --detach --build --remove-orphans {{.CLI_ARGS}}
+
+  logs:
+    desc: Attach to Docker logs
+    cmd: docker compose logs --follow {{.CLI_ARGS}}
+
+  stop:
+    desc: Stop containers
+    cmd: docker compose stop {{.CLI_ARGS}}
+
+  restart:
+    desc: Restart containers
+    cmd: docker compose restart {{.CLI_ARGS}}
+
+  exec:
+    desc: Run a command in the specified container
+    cmd: docker compose exec -- {{.CLI_ARGS}}
+
+  down:
+    desc: Remove containers
+    cmd: docker compose down --remove-orphans {{.CLI_ARGS}}
+
+  clean:
+    desc: Nuke everything
+    cmd: docker compose down --volumes --remove-orphans {{.CLI_ARGS}}
