@@ -22,7 +22,7 @@ services:
       - '3000:3000'
 
   db:
-    image: ghcr.io/kvdomingo/postgresql-pig:17-bitnami
+    image: ghcr.io/kvdomingo/postgresql-pig-standalone:17-bitnami
     restart: unless-stopped
     environment:
       POSTGRESQL_USERNAME: postgres
