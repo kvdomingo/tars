@@ -22,7 +22,7 @@ services:
       - '3000:3000'
 
   db:
-    image: bitnami/postgresql:17
+    image: ghcr.io/kvdomingo/postgresql-pig:17-bitnami
     restart: unless-stopped
     environment:
       POSTGRESQL_USERNAME: postgres
@@ -30,3 +30,23 @@ services:
       POSTGRESQL_DATABASE: postgres
     volumes:
       - db-data:/bitnami/postgresql
+      - ./db-init:/docker-entrypoint-initdb.d
+    ports:
+      - '5432:5432'
+
+  drizzle-studio:
+    image: oven/bun:1
+    restart: unless-stopped
+    init: true
+    command:
+      - /bin/bash
+      - -euxo
+      - pipefail
+      - -c
+      - >
+        bun install && exec bunx drizzle-kit studio --host 0.0.0.0 --port 5000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - '5000:5000'

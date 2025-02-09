@@ -17,6 +17,7 @@ tasks:
 
   logs:
     desc: Attach to Docker logs
+    interactive: true
     cmd: docker compose logs --follow {{.CLI_ARGS}}
 
   stop:
@@ -30,6 +31,11 @@ tasks:
   exec:
     desc: Run a command in the specified container
     cmd: docker compose exec -- {{.CLI_ARGS}}
+
+  psql:
+    desc: Run psql
+    interactive: true
+    cmd: task exec -- db psql "postgres://postgres:postgres@localhost:5432/postgres"
 
   down:
     desc: Remove containers
