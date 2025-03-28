@@ -1,0 +1,37 @@
+import {
+  customProvider,
+  extractReasoningMiddleware,
+  wrapLanguageModel,
+} from 'ai';
+import { groq } from '@ai-sdk/groq';
+import { xai } from '@ai-sdk/xai';
+import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { isTestEnvironment } from '../constants';
+import {
+  artifactModel,
+  chatModel,
+  reasoningModel,
+  titleModel,
+} from './models.test';
+
+export const myProvider = isTestEnvironment
+  ? customProvider({
+      languageModels: {
+        'chat-model': chatModel,
+        'chat-model-reasoning': reasoningModel,
+        'title-model': titleModel,
+        'artifact-model': artifactModel,
+      },
+    })
+  : customProvider({
+      languageModels: {
+        'chat-model': openai('gpt-4o'),
+        'chat-model-reasoning': wrapLanguageModel({
+          model: anthropic('claude-3-7-sonnet-20250219'),
+          middleware: extractReasoningMiddleware({ tagName: 'think' }),
+        }),
+        'title-model': anthropic('claude-3-5-haiku-latest'),
+        'artifact-model': anthropic('claude-3-5-sonnet-latest'),
+      },
+    });
