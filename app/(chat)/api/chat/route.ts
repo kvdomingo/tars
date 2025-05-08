@@ -1,10 +1,7 @@
 import { auth } from '@/app/(auth)/auth';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import { myProvider } from '@/lib/ai/providers';
-import { createDocument } from '@/lib/ai/tools/create-document';
-import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-import { tavilyClient } from '@/lib/ai/tools/tavily-web-search';
-import { updateDocument } from '@/lib/ai/tools/update-document';
+import { TOOLS } from '@/lib/ai/tools';
 import { isProductionEnvironment } from '@/lib/constants';
 import {
   createStreamId,
@@ -17,7 +14,6 @@ import {
 } from '@/lib/db/queries';
 import type { Chat } from '@/lib/db/schema';
 import { generateUUID, getTrailingMessageId } from '@/lib/utils';
-import { createAISDKTools } from '@agentic/ai-sdk';
 import { geolocation } from '@vercel/functions';
 import {
   appendClientMessage,
@@ -70,7 +66,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { id, message, selectedChatModel, selectedVisibilityType } =
+    const { id, message, selectedVisibilityType, selectedTools, isReasoning } =
       requestBody;
 
     const session = await auth();
@@ -134,21 +130,23 @@ export async function POST(request: Request) {
     const stream = createDataStream({
       execute: (dataStream) => {
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          model: isReasoning
+            ? myProvider.languageModel('chat-model-reasoning')
+            : myProvider.languageModel('chat-model'),
+          system: systemPrompt({ requestHints, isReasoning }),
+          providerOptions: isReasoning
+            ? {
+                openai: { reasoningEffort: 'medium' },
+              }
+            : undefined,
           messages,
+          maxRetries: 3,
           maxSteps: 5,
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
-          tools: {
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session,
-              dataStream,
-            }),
-            ...createAISDKTools(tavilyClient),
-          },
+          experimental_activeTools: selectedTools,
+          tools: TOOLS,
+          toolCallStreaming: false,
           onFinish: async ({ response }) => {
             if (session.user?.id) {
               try {
@@ -195,9 +193,11 @@ export async function POST(request: Request) {
 
         result.mergeIntoDataStream(dataStream, {
           sendReasoning: true,
+          sendSources: true,
         });
       },
-      onError: () => {
+      onError: (error) => {
+        console.error(error);
         return 'Oops, an error occurred!';
       },
     });

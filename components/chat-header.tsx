@@ -1,12 +1,10 @@
 'use client';
-import { useRouter } from 'next/navigation';
-import { useWindowSize } from 'usehooks-ts';
-
-import { ModelSelector } from '@/components/model-selector';
 import { SidebarToggle } from '@/components/sidebar-toggle';
 import { Button } from '@/components/ui/button';
 import type { Session } from 'next-auth';
+import { useRouter } from 'next/navigation';
 import { memo } from 'react';
+import { useWindowSize } from 'usehooks-ts';
 import { PlusIcon } from './icons';
 import { useSidebar } from './ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -51,14 +49,6 @@ function PureChatHeader({
           </TooltipTrigger>
           <TooltipContent>New Chat</TooltipContent>
         </Tooltip>
-      )}
-
-      {!isReadonly && (
-        <ModelSelector
-          session={session}
-          selectedModelId={selectedModelId}
-          className="order-1 md:order-2"
-        />
       )}
 
       {!isReadonly && (

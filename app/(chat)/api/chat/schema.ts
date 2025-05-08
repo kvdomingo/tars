@@ -23,8 +23,9 @@ export const postRequestBodySchema = z.object({
       )
       .optional(),
   }),
-  selectedChatModel: z.enum(['chat-model', 'chat-model-reasoning']),
   selectedVisibilityType: z.enum(['public', 'private']),
+  selectedTools: z.array(z.string()),
+  isReasoning: z.boolean().default(false),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

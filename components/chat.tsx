@@ -6,6 +6,7 @@ import { useAutoResume } from '@/hooks/use-auto-resume';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import type { Vote } from '@/lib/db/schema';
 import { fetcher, generateUUID } from '@/lib/utils';
+import useStore from '@/stores/store';
 import { useChat } from '@ai-sdk/react';
 import type { Attachment, UIMessage } from 'ai';
 import type { Session } from 'next-auth';
@@ -38,6 +39,7 @@ export function Chat({
   autoResume: boolean;
 }) {
   const { mutate } = useSWRConfig();
+  const { selectedTools, isReasoning } = useStore();
 
   const { visibilityType } = useChatVisibility({
     chatId: id,
@@ -65,8 +67,9 @@ export function Chat({
     experimental_prepareRequestBody: (body) => ({
       id,
       message: body.messages.at(-1),
-      selectedChatModel: initialChatModel,
       selectedVisibilityType: visibilityType,
+      selectedTools: [...selectedTools],
+      isReasoning,
     }),
     onFinish: () => {
       mutate(unstable_serialize(getChatHistoryPaginationKey));

@@ -4,14 +4,12 @@ import type { Attachment, UIMessage } from 'ai';
 import cx from 'classnames';
 import type React from 'react';
 import {
-  type ChangeEvent,
   type Dispatch,
   type SetStateAction,
   memo,
   useCallback,
   useEffect,
   useRef,
-  useState,
 } from 'react';
 import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
@@ -20,10 +18,12 @@ import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import equal from 'fast-deep-equal';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
-import { PreviewAttachment } from './preview-attachment';
+import { ArrowDown, Send } from 'lucide-react';
+import { PaperclipIcon, StopIcon } from './icons';
+
+import SearchTypeSelector from './search-type-selector';
 import { SuggestedActions } from './suggested-actions';
+import ToolsSelector from './tools-selector';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import type { VisibilityType } from './visibility-selector';
@@ -106,9 +106,6 @@ function PureMultimodalInput({
     adjustHeight();
   };
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
-
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
 
@@ -131,59 +128,6 @@ function PureMultimodalInput({
     width,
     chatId,
   ]);
-
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('/api/files/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const { url, pathname, contentType } = data;
-
-        return {
-          url,
-          name: pathname,
-          contentType: contentType,
-        };
-      }
-      const { error } = await response.json();
-      toast.error(error);
-    } catch (error) {
-      toast.error('Failed to upload file, please try again!');
-    }
-  };
-
-  const handleFileChange = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(event.target.files || []);
-
-      setUploadQueue(files.map((file) => file.name));
-
-      try {
-        const uploadPromises = files.map((file) => uploadFile(file));
-        const uploadedAttachments = await Promise.all(uploadPromises);
-        const successfullyUploadedAttachments = uploadedAttachments.filter(
-          (attachment) => attachment !== undefined,
-        );
-
-        setAttachments((currentAttachments) => [
-          ...currentAttachments,
-          ...successfullyUploadedAttachments,
-        ]);
-      } catch (error) {
-        console.error('Error uploading files!', error);
-      } finally {
-        setUploadQueue([]);
-      }
-    },
-    [setAttachments],
-  );
 
   const { isAtBottom, scrollToBottom } = useScrollToBottom();
 
@@ -220,46 +164,12 @@ function PureMultimodalInput({
         )}
       </AnimatePresence>
 
-      {messages.length === 0 &&
-        attachments.length === 0 &&
-        uploadQueue.length === 0 && (
-          <SuggestedActions
-            append={append}
-            chatId={chatId}
-            selectedVisibilityType={selectedVisibilityType}
-          />
-        )}
-
-      <input
-        type="file"
-        className="-top-4 -left-4 pointer-events-none fixed size-0.5 opacity-0"
-        ref={fileInputRef}
-        multiple
-        onChange={handleFileChange}
-        tabIndex={-1}
-      />
-
-      {(attachments.length > 0 || uploadQueue.length > 0) && (
-        <div
-          data-testid="attachments-preview"
-          className="flex flex-row items-end gap-2 overflow-x-scroll"
-        >
-          {attachments.map((attachment) => (
-            <PreviewAttachment key={attachment.url} attachment={attachment} />
-          ))}
-
-          {uploadQueue.map((filename) => (
-            <PreviewAttachment
-              key={filename}
-              attachment={{
-                url: '',
-                name: filename,
-                contentType: '',
-              }}
-              isUploading={true}
-            />
-          ))}
-        </div>
+      {messages.length === 0 && attachments.length === 0 && (
+        <SuggestedActions
+          append={append}
+          chatId={chatId}
+          selectedVisibilityType={selectedVisibilityType}
+        />
       )}
 
       <Textarea
@@ -292,18 +202,15 @@ function PureMultimodalInput({
       />
 
       <div className="absolute bottom-0 flex w-fit flex-row justify-start p-2">
-        <AttachmentsButton fileInputRef={fileInputRef} status={status} />
+        <SearchTypeSelector />
+        <ToolsSelector />
       </div>
 
       <div className="absolute right-0 bottom-0 flex w-fit flex-row justify-end p-2">
         {status === 'submitted' ? (
           <StopButton stop={stop} setMessages={setMessages} />
         ) : (
-          <SendButton
-            input={input}
-            submitForm={submitForm}
-            uploadQueue={uploadQueue}
-          />
+          <SendButton input={input} submitForm={submitForm} uploadQueue={[]} />
         )}
       </div>
     </div>
@@ -391,7 +298,7 @@ function PureSendButton({
       }}
       disabled={input.length === 0 || uploadQueue.length > 0}
     >
-      <ArrowUpIcon size={14} />
+      <Send size={14} />
     </Button>
   );
 }
