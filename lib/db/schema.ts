@@ -11,14 +11,14 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
-export const user = pgTable('User', {
+export const user = pgTable('users', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   email: varchar('email', { length: 64 }).notNull(),
 });
 
 export type User = InferSelectModel<typeof user>;
 
-export const chat = pgTable('Chat', {
+export const chat = pgTable('chats', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   createdAt: timestamp('createdAt').notNull(),
   title: text('title').notNull(),
@@ -32,21 +32,7 @@ export const chat = pgTable('Chat', {
 
 export type Chat = InferSelectModel<typeof chat>;
 
-// DEPRECATED: The following schema is deprecated and will be removed in the future.
-// Read the migration guide at https://chat-sdk.dev/docs/migration-guides/message-parts
-export const messageDeprecated = pgTable('Message', {
-  id: uuid('id').primaryKey().notNull().defaultRandom(),
-  chatId: uuid('chatId')
-    .notNull()
-    .references(() => chat.id),
-  role: varchar('role').notNull(),
-  content: json('content').notNull(),
-  createdAt: timestamp('createdAt').notNull(),
-});
-
-export type MessageDeprecated = InferSelectModel<typeof messageDeprecated>;
-
-export const message = pgTable('Message_v2', {
+export const message = pgTable('messages', {
   id: uuid('id').primaryKey().notNull().defaultRandom(),
   chatId: uuid('chatId')
     .notNull()
@@ -59,30 +45,8 @@ export const message = pgTable('Message_v2', {
 
 export type DBMessage = InferSelectModel<typeof message>;
 
-// DEPRECATED: The following schema is deprecated and will be removed in the future.
-// Read the migration guide at https://chat-sdk.dev/docs/migration-guides/message-parts
-export const voteDeprecated = pgTable(
-  'Vote',
-  {
-    chatId: uuid('chatId')
-      .notNull()
-      .references(() => chat.id),
-    messageId: uuid('messageId')
-      .notNull()
-      .references(() => messageDeprecated.id),
-    isUpvoted: boolean('isUpvoted').notNull(),
-  },
-  (table) => {
-    return {
-      pk: primaryKey({ columns: [table.chatId, table.messageId] }),
-    };
-  },
-);
-
-export type VoteDeprecated = InferSelectModel<typeof voteDeprecated>;
-
 export const vote = pgTable(
-  'Vote_v2',
+  'votes',
   {
     chatId: uuid('chatId')
       .notNull()
@@ -102,7 +66,7 @@ export const vote = pgTable(
 export type Vote = InferSelectModel<typeof vote>;
 
 export const document = pgTable(
-  'Document',
+  'documents',
   {
     id: uuid('id').notNull().defaultRandom(),
     createdAt: timestamp('createdAt').notNull(),
@@ -125,7 +89,7 @@ export const document = pgTable(
 export type Document = InferSelectModel<typeof document>;
 
 export const suggestion = pgTable(
-  'Suggestion',
+  'suggestions',
   {
     id: uuid('id').notNull().defaultRandom(),
     documentId: uuid('documentId').notNull(),
@@ -151,7 +115,7 @@ export const suggestion = pgTable(
 export type Suggestion = InferSelectModel<typeof suggestion>;
 
 export const stream = pgTable(
-  'Stream',
+  'streams',
   {
     id: uuid('id').notNull().defaultRandom(),
     chatId: uuid('chatId').notNull(),
