@@ -1,0 +1,47 @@
+version: '3'
+
+tasks:
+  default:
+    cmd:
+      task: up
+
+  init:
+    desc: Initial setup
+    cmds:
+      - pip install -U pre-commit
+      - pre-commit install
+      - bun install
+      - bun run db:generate
+      - bun run db:migrate
+
+  up:
+    desc: Build and start containers
+    cmd: infisical run -- docker compose up --detach --build --remove-orphans {{ .CLI_ARGS }}
+
+  stop:
+    desc: Stop containers
+    cmd: docker compose stop {{ .CLI_ARGS }}
+
+  logs:
+    desc: Follow logs
+    cmd: docker compose logs --follow {{ .CLI_ARGS }}
+
+  restart:
+    desc: Restart containers
+    cmd: docker compose restart {{ .CLI_ARGS }}
+
+  down:
+    desc: Stop and remove containers
+    cmd: docker compose down {{ .CLI_ARGS }}
+
+  clean:
+    desc: Nuke everything
+    cmd: docker compose down --volumes --remove-orphans {{ .CLI_ARGS }}
+
+  exec:
+    desc: Execute a command in a running container
+    cmd: docker compose exec {{ .CLI_ARGS }}
+
+  psql:
+    desc: Attach to psql shell in the db container
+    cmd: task exec -- db psql -U postgres

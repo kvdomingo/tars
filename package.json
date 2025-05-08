@@ -3,19 +3,19 @@
   "version": "3.0.22",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "infisical run -- next dev --turbo",
     "build": "tsx lib/db/migrate && next build",
     "start": "next start",
     "lint": "next lint && biome lint --write --unsafe",
     "lint:fix": "next lint --fix && biome lint --write --unsafe",
     "format": "biome format --write",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "npx tsx lib/db/migrate.ts",
-    "db:studio": "drizzle-kit studio",
-    "db:push": "drizzle-kit push",
-    "db:pull": "drizzle-kit pull",
-    "db:check": "drizzle-kit check",
-    "db:up": "drizzle-kit up",
+    "db:generate": "infisical run -- drizzle-kit generate",
+    "db:migrate": "infisical run -- npx tsx lib/db/migrate.ts",
+    "db:studio": "infisical run -- drizzle-kit studio",
+    "db:push": "infisical run -- drizzle-kit push",
+    "db:pull": "infisical run -- drizzle-kit pull",
+    "db:check": "infisical run -- drizzle-kit check",
+    "db:up": "infisical run -- drizzle-kit up",
     "test": "export PLAYWRIGHT=True && pnpm exec playwright test"
   },
   "dependencies": {
@@ -99,15 +99,9 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "drizzle-kit": "^0.25.0",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.5",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-import-resolver-typescript": "^3.6.3",
-    "eslint-plugin-tailwindcss": "^3.17.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3"
-  },
-  "packageManager": "pnpm@9.12.3"
+  }
 }

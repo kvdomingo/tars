@@ -1,0 +1,24 @@
+name: tars
+
+volumes:
+  db-data:
+  redis-data:
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: redis:8
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - '6379:6379'

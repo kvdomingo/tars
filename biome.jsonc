@@ -85,7 +85,8 @@
         "noDocumentImportInPage": "warn",
         "noDuplicateElseIf": "warn",
         "noIrregularWhitespace": "warn",
-        "useValidAutocomplete": "warn"
+        "useValidAutocomplete": "warn",
+        "useSortedClasses": "warn"
       }
     }
   },
@@ -114,10 +115,10 @@
     }
   },
   "css": {
-    "formatter": { "enabled": false },
+    "formatter": { "enabled": true },
     "linter": { "enabled": false }
   },
-  "organizeImports": { "enabled": false },
+  "organizeImports": { "enabled": true },
   "overrides": [
     // Playwright requires an object destructure, even if empty
     // https://github.com/microsoft/playwright/issues/30007
