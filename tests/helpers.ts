@@ -4,12 +4,12 @@ import {
   type APIRequestContext,
   type Browser,
   type BrowserContext,
-  expect,
   type Page,
+  expect,
 } from '@playwright/test';
 import { generateId } from 'ai';
-import { ChatPage } from './pages/chat';
 import { getUnixTime } from 'date-fns';
+import { ChatPage } from './pages/chat';
 
 export type UserContext = {
   context: BrowserContext;

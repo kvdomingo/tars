@@ -1,6 +1,7 @@
 import 'server-only';
 
 import {
+  type SQL,
   and,
   asc,
   count,
@@ -10,28 +11,27 @@ import {
   gte,
   inArray,
   lt,
-  type SQL,
 } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-import {
-  user,
-  chat,
-  type User,
-  document,
-  type Suggestion,
-  suggestion,
-  message,
-  vote,
-  type DBMessage,
-  type Chat,
-  stream,
-} from './schema';
 import type { ArtifactKind } from '@/components/artifact';
-import { generateUUID } from '../utils';
-import { generateHashedPassword } from './utils';
 import type { VisibilityType } from '@/components/visibility-selector';
+import { generateUUID } from '../utils';
+import {
+  stream,
+  type Chat,
+  type DBMessage,
+  type Suggestion,
+  type User,
+  chat,
+  document,
+  message,
+  suggestion,
+  user,
+  vote,
+} from './schema';
+import { generateHashedPassword } from './utils';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -50,11 +50,21 @@ export async function getUser(email: string): Promise<Array<User>> {
   }
 }
 
-export async function createUser(email: string, password: string) {
-  const hashedPassword = generateHashedPassword(password);
-
+export async function createUser(
+  email: string,
+  password: string,
+): Promise<User> {
   try {
-    return await db.insert(user).values({ email, password: hashedPassword });
+    const hashedPassword = generateHashedPassword(password);
+    const [newUser] = await db
+      .insert(user)
+      .values({
+        email,
+        password: hashedPassword,
+      })
+      .returning();
+
+    return newUser;
   } catch (error) {
     console.error('Failed to create user in database');
     throw error;

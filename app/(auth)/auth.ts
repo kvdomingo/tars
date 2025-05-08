@@ -6,7 +6,7 @@ import type { DefaultJWT } from 'next-auth/jwt';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
 
-export type UserType = 'guest' | 'regular';
+export type UserType = 'regular';
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
