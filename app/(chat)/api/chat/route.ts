@@ -1,5 +1,4 @@
-import { type UserType, auth } from '@/app/(auth)/auth';
-import { entitlementsByUserType } from '@/lib/ai/entitlements';
+import { auth } from '@/app/(auth)/auth';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import { myProvider } from '@/lib/ai/providers';
 import { createDocument } from '@/lib/ai/tools/create-document';
@@ -11,7 +10,6 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
-  getMessageCountByUserId,
   getMessagesByChatId,
   getStreamIdsByChatId,
   saveChat,
@@ -78,22 +76,6 @@ export async function POST(request: Request) {
 
     if (!session?.user) {
       return new Response('Unauthorized', { status: 401 });
-    }
-
-    const userType: UserType = session.user.type;
-
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
-
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
-      return new Response(
-        'You have exceeded your maximum number of messages for the day! Please try again later.',
-        {
-          status: 429,
-        },
-      );
     }
 
     const chat = await getChatById({ id });
@@ -237,7 +219,8 @@ export async function POST(request: Request) {
     } else {
       return new Response(stream);
     }
-  } catch (_) {
+  } catch (error) {
+    console.error('Error in chat POST:', error);
     return new Response('An error occurred while processing your request!', {
       status: 500,
     });

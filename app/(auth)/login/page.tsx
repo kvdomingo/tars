@@ -4,11 +4,8 @@ import { toast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 export default function Page() {
-  const router = useRouter();
-
   const handleGoogleSignIn = async () => {
     try {
       await signIn('google', { callbackUrl: '/' });

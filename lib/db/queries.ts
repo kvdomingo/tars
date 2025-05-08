@@ -17,7 +17,6 @@ import postgres from 'postgres';
 
 import type { ArtifactKind } from '@/components/artifact';
 import type { VisibilityType } from '@/components/visibility-selector';
-import { generateUUID } from '../utils';
 import {
   stream,
   type Chat,
@@ -31,7 +30,6 @@ import {
   user,
   vote,
 } from './schema';
-import { generateHashedPassword } from './utils';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -50,38 +48,18 @@ export async function getUser(email: string): Promise<Array<User>> {
   }
 }
 
-export async function createUser(
-  email: string,
-  password: string,
-): Promise<User> {
+export async function createUser(email: string): Promise<User> {
   try {
-    const hashedPassword = generateHashedPassword(password);
     const [newUser] = await db
       .insert(user)
       .values({
         email,
-        password: hashedPassword,
       })
       .returning();
 
     return newUser;
   } catch (error) {
     console.error('Failed to create user in database');
-    throw error;
-  }
-}
-
-export async function createGuestUser() {
-  const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
-
-  try {
-    return await db.insert(user).values({ email, password }).returning({
-      id: user.id,
-      email: user.email,
-    });
-  } catch (error) {
-    console.error('Failed to create guest user in database');
     throw error;
   }
 }

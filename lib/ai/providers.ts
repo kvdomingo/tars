@@ -1,37 +1,12 @@
-import { xai } from '@ai-sdk/xai';
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from 'ai';
-import { isTestEnvironment } from '../constants';
-import {
-  artifactModel,
-  chatModel,
-  reasoningModel,
-  titleModel,
-} from './models.test';
+import { anthropic } from '@ai-sdk/anthropic';
+import { openai } from '@ai-sdk/openai';
+import { customProvider } from 'ai';
 
-export const myProvider = isTestEnvironment
-  ? customProvider({
-      languageModels: {
-        'chat-model': chatModel,
-        'chat-model-reasoning': reasoningModel,
-        'title-model': titleModel,
-        'artifact-model': artifactModel,
-      },
-    })
-  : customProvider({
-      languageModels: {
-        'chat-model': xai('grok-2-vision-1212'),
-        'chat-model-reasoning': wrapLanguageModel({
-          model: xai('grok-3-mini-beta'),
-          middleware: extractReasoningMiddleware({ tagName: 'think' }),
-        }),
-        'title-model': xai('grok-2-1212'),
-        'artifact-model': xai('grok-2-1212'),
-      },
-      imageModels: {
-        'small-model': xai.image('grok-2-image'),
-      },
-    });
+export const myProvider = customProvider({
+  languageModels: {
+    'chat-model': openai('gpt-4.1-2025-04-14'),
+    'chat-model-reasoning': anthropic('claude-3-7-sonnet-20250219'),
+    'title-model': anthropic('claude-3-5-haiku-20241022'),
+    'artifact-model': anthropic('claude-3-7-sonnet-20250219'),
+  },
+});
