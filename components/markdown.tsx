@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import React, { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
+import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './code-block';
+import { remarkCite } from './markdown/cite';
+import { Badge } from './ui/badge';
 
 const components: Partial<Components> = {
   // @ts-expect-error
@@ -91,9 +94,18 @@ const components: Partial<Components> = {
       </h6>
     );
   },
+  cite: ({ node, children, ...props }) => (
+    <a
+      href={node?.properties?.['data-url'] as string}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <Badge variant="secondary">{children}</Badge>
+    </a>
+  ),
 };
 
-const remarkPlugins = [remarkGfm];
+const remarkPlugins = [remarkGfm, remarkDirective, remarkCite];
 
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   return (
