@@ -5,11 +5,33 @@ import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './code-block';
 import { remarkCite } from './markdown/cite';
+import { HighlightedIngredient, remarkIngredient } from './markdown/ingredient';
 import { Badge } from './ui/badge';
 
 const components: Partial<Components> = {
   // @ts-expect-error
   code: CodeBlock,
+  div: ({ node, children, className, ...props }) => {
+    if (node?.properties?.['data-type'] === 'ingredient') {
+      return (
+        <HighlightedIngredient
+          className={className}
+          properties={{
+            ...props,
+            ...node?.properties,
+          }}
+        >
+          {children}
+        </HighlightedIngredient>
+      );
+    }
+
+    return (
+      <div className={className} {...props}>
+        {children}
+      </div>
+    );
+  },
   pre: ({ children }) => <>{children}</>,
   ol: ({ node, children, ...props }) => {
     return (
@@ -105,7 +127,12 @@ const components: Partial<Components> = {
   ),
 };
 
-const remarkPlugins = [remarkGfm, remarkDirective, remarkCite];
+const remarkPlugins = [
+  remarkGfm,
+  remarkDirective,
+  remarkCite,
+  remarkIngredient,
+];
 
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   return (

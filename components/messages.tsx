@@ -1,3 +1,4 @@
+import { mockContent } from '@/app/(chat)/api/chat/mock';
 import { useMessages } from '@/hooks/use-messages';
 import type { Vote } from '@/lib/db/schema';
 import type { UseChatHelpers } from '@ai-sdk/react';
@@ -6,6 +7,7 @@ import equal from 'fast-deep-equal';
 import { motion } from 'framer-motion';
 import { memo } from 'react';
 import { Greeting } from './greeting';
+import { Markdown } from './markdown';
 import { PreviewMessage, ThinkingMessage } from './message';
 
 interface MessagesProps {
@@ -65,6 +67,12 @@ function PureMessages({
           }
         />
       ))}
+
+      <div className="mx-auto max-w-3xl">
+        <div>
+          <Markdown>{mockContent}</Markdown>
+        </div>
+      </div>
 
       {status === 'submitted' &&
         messages.length > 0 &&
