@@ -97,7 +97,7 @@ ${
 - NEVER make up sources.
 - NEVER include sources that do not come from tool calls.
 - Inline citations MUST appear as numbers in order of appearance.
-- Inline citations MUST use the custom markdown directive :cite[number]{url="url"}
+- Inline citations MUST use the custom markdown directive :cite[number]{url="url"}.
 - Inline citations MUST be padded with a space on both sides.
 - NEVER superscript/subscript the citation.
 - Do not include a list of sources at the end of your response, as this will be handled separately.

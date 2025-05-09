@@ -94,7 +94,7 @@ const components: Partial<Components> = {
       </h6>
     );
   },
-  cite: ({ node, children, ...props }) => (
+  cite: ({ node, children }) => (
     <a
       href={node?.properties?.['data-url'] as string}
       target="_blank"

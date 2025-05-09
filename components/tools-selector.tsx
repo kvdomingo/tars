@@ -54,7 +54,7 @@ export default function ToolsSelector({
           >
             <Globe
               className={cn({
-                'text-sidebar-primary': isOpen || selectedTools.size > 0,
+                'text-sidebar-ring': isOpen || selectedTools.size > 0,
               })}
             />
           </Button>

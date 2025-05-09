@@ -14,6 +14,7 @@ import { MessageActions } from './message-actions';
 import { MessageEditor } from './message-editor';
 import { MessageReasoning } from './message-reasoning';
 import { PreviewAttachment } from './preview-attachment';
+import { Sources } from './sources';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
@@ -175,6 +176,8 @@ const PurePreviewMessage = ({
                 isLoading={isLoading}
               />
             )}
+
+            {message.role === 'assistant' && <Sources message={message} />}
           </div>
         </div>
       </motion.div>

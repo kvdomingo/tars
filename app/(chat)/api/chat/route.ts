@@ -14,6 +14,7 @@ import {
 } from '@/lib/db/queries';
 import type { Chat } from '@/lib/db/schema';
 import { generateUUID, getTrailingMessageId } from '@/lib/utils';
+import type { ToolInvocation, ToolInvocationUIPart } from '@ai-sdk/ui-utils';
 import { geolocation } from '@vercel/functions';
 import {
   appendClientMessage,
@@ -147,6 +148,35 @@ export async function POST(request: Request) {
           experimental_activeTools: selectedTools,
           tools: TOOLS,
           toolCallStreaming: false,
+          onChunk: ({ chunk }) => {
+            switch (chunk.type) {
+              case 'tool-result': {
+                if (chunk.toolName === 'tavily_web_search') {
+                  (
+                    chunk.result as {
+                      query: string;
+                      images: string[];
+                      results: {
+                        title: string;
+                        url: string;
+                        content: string;
+                        score: number;
+                        raw_content: string | null;
+                      }[];
+                    }
+                  ).results.map((r) => {
+                    dataStream.writeSource({
+                      id: `${chunk.toolCallId}-${r.url}`,
+                      sourceType: 'url',
+                      url: r.url,
+                      title: r.title,
+                    });
+                  });
+                  break;
+                }
+              }
+            }
+          },
           onFinish: async ({ response }) => {
             if (session.user?.id) {
               try {
@@ -171,7 +201,40 @@ export async function POST(request: Request) {
                       id: assistantId,
                       chatId: id,
                       role: assistantMessage.role,
-                      parts: assistantMessage.parts,
+                      parts: [
+                        ...(assistantMessage.parts ?? []),
+                        ...(assistantMessage.parts
+                          ?.filter(
+                            (
+                              p,
+                            ): p is ToolInvocationUIPart & {
+                              toolInvocation: ToolInvocation & {
+                                state: 'result';
+                              };
+                            } =>
+                              p.type === 'tool-invocation' &&
+                              p.toolInvocation.state === 'result',
+                          )
+                          .flatMap((p) =>
+                            p.toolInvocation.result.results.map(
+                              (r: {
+                                title: string;
+                                url: string;
+                                content: string;
+                                score: number;
+                                raw_content: string | null;
+                              }) => ({
+                                type: 'source',
+                                source: {
+                                  id: `${p.toolInvocation.toolCallId}-${r.url}`,
+                                  sourceType: 'url',
+                                  url: r.url,
+                                  title: r.title,
+                                },
+                              }),
+                            ),
+                          ) ?? []),
+                      ],
                       attachments:
                         assistantMessage.experimental_attachments ?? [],
                       createdAt: new Date(),
